@@ -1,0 +1,33 @@
+package com.example.mrrs.controller;
+
+import com.example.mrrs.dto.*;
+import com.example.mrrs.dto.user.AuthResponse;
+import com.example.mrrs.dto.user.LoginRequest;
+import com.example.mrrs.dto.user.RegisterRequest;
+import com.example.mrrs.service.AuthService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+
+@RestController
+@RequestMapping("/auth")
+@RequiredArgsConstructor
+public class AuthController {
+
+    private final AuthService authService;
+
+    public AuthController(AuthService authService) {
+        this.authService = authService;
+    }
+
+    @PostMapping("/register")
+    public ResponseEntity<AuthResponse> register(@RequestBody RegisterRequest request){
+        return ResponseEntity.ok(authService.register(request));
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<AuthResponse> login(@RequestBody LoginRequest request){
+        return ResponseEntity.ok(authService.login(request));
+    }
+}
