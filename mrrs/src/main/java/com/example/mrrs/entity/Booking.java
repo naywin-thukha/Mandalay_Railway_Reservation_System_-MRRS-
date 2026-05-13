@@ -34,4 +34,7 @@ public class Booking {
     private BookingStatus status;
 
     private BigDecimal totalAmount;
+
+    @OneToOne(mappedBy = "booking", cascade = CascadeType.ALL)
+    private Payment payment;
 }
