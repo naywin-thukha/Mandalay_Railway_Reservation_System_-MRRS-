@@ -1,0 +1,393 @@
+USE mrrs_db;
+
+SET FOREIGN_KEY_CHECKS = 0;
+
+TRUNCATE TABLE admin_logs;
+TRUNCATE TABLE booking_seats;
+TRUNCATE TABLE notifications;
+TRUNCATE TABLE refunds;
+TRUNCATE TABLE payments;
+TRUNCATE TABLE tickets;
+TRUNCATE TABLE seat_holds;
+TRUNCATE TABLE bookings;
+TRUNCATE TABLE route_stops;
+TRUNCATE TABLE schedules;
+TRUNCATE TABLE seats;
+TRUNCATE TABLE routes;
+TRUNCATE TABLE trains;
+TRUNCATE TABLE stations;
+TRUNCATE TABLE users;
+
+SET FOREIGN_KEY_CHECKS = 1;
+
+INSERT INTO users(nrc_id, full_name, phone, email, password_hash, role)
+VALUES
+('12/LaKaNa(N)000001', 'System Admin', '09111111111', 'admin1@mrrs.com', 'admin123', 'ADMIN'),
+('12/LaKaNa(N)000002', 'Main Admin', '09222222222', 'admin2@mrrs.com', 'admin123', 'ADMIN');
+
+DELIMITER $$
+CREATE PROCEDURE insert_users()
+BEGIN
+    DECLARE i INT DEFAULT 1;
+
+    WHILE i <= 98 DO
+        INSERT INTO users(
+            nrc_id,
+            full_name,
+            phone,
+            email,
+            password_hash,
+            role
+        )
+        VALUES(
+            CONCAT('12/PaTaNa(N)', LPAD(i, 6, '0')),
+            CONCAT('Passenger ', i),
+            CONCAT('09', LPAD(i, 9, '1')),
+            CONCAT('passenger', i, '@gmail.com'),
+            'pass123',
+            'PASSENGER'
+        );
+
+        SET i = i + 1;
+    END WHILE;
+END $$
+DELIMITER ;
+
+CALL insert_users();
+DROP PROCEDURE insert_users;
+
+DELIMITER $$
+CREATE PROCEDURE insert_stations()
+BEGIN
+    DECLARE i INT DEFAULT 1;
+
+    WHILE i <= 100 DO
+        INSERT INTO stations(station_name, city, code, station_code)
+        VALUES(
+            CONCAT('Station ', i),
+            CONCAT('City ', i),
+            CONCAT('S', LPAD(i, 3, '0')),
+            CONCAT('STATION-', LPAD(i, 3, '0'))
+        );
+
+        SET i = i + 1;
+    END WHILE;
+END $$
+DELIMITER ;
+
+CALL insert_stations();
+DROP PROCEDURE insert_stations;
+
+DELIMITER $$
+CREATE PROCEDURE insert_routes()
+BEGIN
+    DECLARE i INT DEFAULT 1;
+
+    WHILE i <= 100 DO
+        INSERT INTO routes(origin_station_id, destination_station_id, distance_km, duration_minutes)
+        VALUES(
+            i,
+            IF(i = 100, 1, i + 1),
+            100 + i,
+            120 + i
+        );
+
+        SET i = i + 1;
+    END WHILE;
+END $$
+DELIMITER ;
+
+CALL insert_routes();
+DROP PROCEDURE insert_routes;
+
+DELIMITER $$
+CREATE PROCEDURE insert_trains()
+BEGIN
+    DECLARE i INT DEFAULT 1;
+
+    WHILE i <= 100 DO
+        INSERT INTO trains(train_name, train_code, total_seats, status)
+        VALUES(
+            CONCAT('Express Train ', i),
+            CONCAT('TR', LPAD(i, 3, '0')),
+            120,
+            'ACTIVE'
+        );
+
+        SET i = i + 1;
+    END WHILE;
+END $$
+DELIMITER ;
+
+CALL insert_trains();
+DROP PROCEDURE insert_trains;
+
+DELIMITER $$
+CREATE PROCEDURE insert_seats()
+BEGIN
+    DECLARE i INT DEFAULT 1;
+
+    WHILE i <= 100 DO
+        INSERT INTO seats(train_id, seat_number, seat_class, is_available)
+        VALUES(
+            ((i - 1) MOD 100) + 1,
+            CONCAT('A-', i),
+            IF(i MOD 5 = 0, 'VIP', 'NORMAL'),
+            TRUE
+        );
+
+        SET i = i + 1;
+    END WHILE;
+END $$
+DELIMITER ;
+
+CALL insert_seats();
+DROP PROCEDURE insert_seats;
+
+DELIMITER $$
+CREATE PROCEDURE insert_schedules()
+BEGIN
+    DECLARE i INT DEFAULT 1;
+
+    WHILE i <= 100 DO
+        INSERT INTO schedules(train_id, route_id, travel_date, departure_time, arrival_time, price)
+        VALUES(
+            i,
+            i,
+            DATE_ADD('2026-06-01', INTERVAL i DAY),
+            '08:00:00',
+            '14:00:00',
+            15000 + (i * 500)
+        );
+
+        SET i = i + 1;
+    END WHILE;
+END $$
+DELIMITER ;
+
+CALL insert_schedules();
+DROP PROCEDURE insert_schedules;
+
+DELIMITER $$
+CREATE PROCEDURE insert_bookings()
+BEGIN
+    DECLARE i INT DEFAULT 1;
+
+    WHILE i <= 100 DO
+        INSERT INTO bookings(user_id, schedule_id, status, total_amount)
+        VALUES(
+            i,
+            i,
+            'CONFIRMED',
+            20000 + (i * 100)
+        );
+
+        SET i = i + 1;
+    END WHILE;
+END $$
+DELIMITER ;
+
+CALL insert_bookings();
+DROP PROCEDURE insert_bookings;
+
+DELIMITER $$
+CREATE PROCEDURE insert_booking_seats()
+BEGIN
+    DECLARE i INT DEFAULT 1;
+
+    WHILE i <= 100 DO
+        INSERT INTO booking_seats(booking_id, seat_id)
+        VALUES(i, i);
+
+        SET i = i + 1;
+    END WHILE;
+END $$
+DELIMITER ;
+
+CALL insert_booking_seats();
+DROP PROCEDURE insert_booking_seats;
+
+DELIMITER $$
+CREATE PROCEDURE insert_payments()
+BEGIN
+    DECLARE i INT DEFAULT 1;
+
+    WHILE i <= 100 DO
+        INSERT INTO payments(booking_id, payment_method, payment_status, transaction_ref, paid_at)
+        VALUES(
+            i,
+            'KBZPay',
+            'SUCCESS',
+            CONCAT('TXN-', LPAD(i, 6, '0')),
+            NOW()
+        );
+
+        SET i = i + 1;
+    END WHILE;
+END $$
+DELIMITER ;
+
+CALL insert_payments();
+DROP PROCEDURE insert_payments;
+
+DELIMITER $$
+CREATE PROCEDURE insert_refunds()
+BEGIN
+    DECLARE i INT DEFAULT 1;
+
+    WHILE i <= 100 DO
+        INSERT INTO refunds(payment_id, amount, reason, refund_status, processed_at)
+        VALUES(
+            i,
+            5000,
+            CONCAT('Refund Reason ', i),
+            'COMPLETED',
+            NOW()
+        );
+
+        SET i = i + 1;
+    END WHILE;
+END $$
+DELIMITER ;
+
+CALL insert_refunds();
+DROP PROCEDURE insert_refunds;
+
+DELIMITER $$
+CREATE PROCEDURE insert_notifications()
+BEGIN
+    DECLARE i INT DEFAULT 1;
+
+    WHILE i <= 100 DO
+        INSERT INTO notifications(user_id, title, message, type, is_read)
+        VALUES(
+            i,
+            CONCAT('Notification ', i),
+            CONCAT('This is notification message ', i),
+            'BOOKING',
+            FALSE
+        );
+
+        SET i = i + 1;
+    END WHILE;
+END $$
+DELIMITER ;
+
+CALL insert_notifications();
+DROP PROCEDURE insert_notifications;
+
+DELIMITER $$
+CREATE PROCEDURE insert_admin_logs()
+BEGIN
+    DECLARE i INT DEFAULT 1;
+
+    WHILE i <= 100 DO
+        INSERT INTO admin_logs(admin_id, action, target_table, target_id, description, ip_address)
+        VALUES(
+            1,
+            CONCAT('UPDATED RECORD ', i),
+            'trains',
+            i,
+            CONCAT('Admin updated train ', i),
+            '127.0.0.1'
+        );
+
+        SET i = i + 1;
+    END WHILE;
+END $$
+DELIMITER ;
+
+CALL insert_admin_logs();
+DROP PROCEDURE insert_admin_logs;
+
+DELIMITER $$
+CREATE PROCEDURE insert_route_stops()
+BEGIN
+    DECLARE i INT DEFAULT 1;
+
+    WHILE i <= 100 DO
+        INSERT INTO route_stops(route_id, station_id, stop_order, arrival_time, departure_time)
+        VALUES(
+            ((i - 1) MOD 100) + 1,
+            ((i - 1) MOD 100) + 1,
+            i,
+            '10:00:00',
+            '10:15:00'
+        );
+
+        SET i = i + 1;
+    END WHILE;
+END $$
+DELIMITER ;
+
+CALL insert_route_stops();
+DROP PROCEDURE insert_route_stops;
+
+DELIMITER $$
+CREATE PROCEDURE insert_seat_holds()
+BEGIN
+    DECLARE i INT DEFAULT 1;
+
+    WHILE i <= 100 DO
+        INSERT INTO seat_holds(seat_id, schedule_id, user_id, expires_at)
+        VALUES(
+            i,
+            i,
+            i,
+            DATE_ADD(NOW(), INTERVAL 15 MINUTE)
+        );
+
+        SET i = i + 1;
+    END WHILE;
+END $$
+DELIMITER ;
+
+CALL insert_seat_holds();
+DROP PROCEDURE insert_seat_holds;
+
+DELIMITER $$
+CREATE PROCEDURE insert_tickets()
+BEGIN
+    DECLARE i INT DEFAULT 1;
+
+    WHILE i <= 100 DO
+        INSERT INTO tickets(booking_id, pnr_number, qr_code, status)
+        VALUES(
+            i,
+            CONCAT('PNR', LPAD(i, 6, '0')),
+            CONCAT('QR-CODE-', i),
+            'ACTIVE'
+        );
+
+        SET i = i + 1;
+    END WHILE;
+END $$
+DELIMITER ;
+
+CALL insert_tickets();
+DROP PROCEDURE insert_tickets;
+
+SELECT COUNT(*) AS users_count FROM users;
+SELECT COUNT(*) AS stations_count FROM stations;
+SELECT COUNT(*) AS routes_count FROM routes;
+SELECT COUNT(*) AS trains_count FROM trains;
+SELECT COUNT(*) AS schedules_count FROM schedules;
+SELECT COUNT(*) AS seats_count FROM seats;
+SELECT COUNT(*) AS bookings_count FROM bookings;
+SELECT COUNT(*) AS payments_count FROM payments;
+SELECT COUNT(*) AS tickets_count FROM tickets;
+
+-- =========================================
+-- LOGIN ACCOUNTS
+-- =========================================
+
+-- ADMINS
+-- admin1@mrrs.com / admin123
+-- admin2@mrrs.com / admin123
+
+-- PASSENGERS
+-- passenger1@gmail.com / pass123
+-- passenger2@gmail.com / pass123
+-- passenger3@gmail.com / pass123
+-- passenger4@gmail.com / pass123
+-- passenger5@gmail.com / pass123
